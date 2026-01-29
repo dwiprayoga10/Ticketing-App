@@ -7,11 +7,14 @@ use Illuminate\Http\Request;
 class LokasiController extends Controller
 {
     /** 
-     * Tampilkan daftar lokasi 
+     * Tampilkan lokasi aktif 
      */
     public function index()
     {
-        $lokasis = Lokasi::orderBy('id', 'desc')->get();
+        $lokasis = Lokasi::where('aktif', 'Y')
+            ->orderBy('id', 'desc')
+            ->get();
+
         return view('admin.lokasi.index', compact('lokasis'));
     }
 
@@ -24,7 +27,7 @@ class LokasiController extends Controller
     }
 
     /** 
-     * Simpan data lokasi 
+     * Simpan lokasi baru 
      */
     public function store(Request $request)
     {
@@ -34,7 +37,7 @@ class LokasiController extends Controller
 
         Lokasi::create([
             'nama_lokasi' => $request->nama_lokasi,
-            'aktif' => $request->aktif ?? 'Y',
+            'aktif' => 'Y',
         ]);
 
         return redirect()
@@ -51,7 +54,7 @@ class LokasiController extends Controller
     }
 
     /** 
-     * Update data lokasi 
+     * Update lokasi 
      */
     public function update(Request $request, Lokasi $lokasi)
     {
@@ -67,18 +70,21 @@ class LokasiController extends Controller
 
         return redirect()
             ->route('admin.lokasi.index')
-            ->with('success', 'Lokasi berhasil diupdate');
+            ->with('success', 'Lokasi berhasil diperbarui');
     }
 
     /** 
-     * Hapus lokasi 
+     * "Hapus" lokasi (SOFT DELETE MANUAL)
+     * aktif Y → N
      */
     public function destroy(Lokasi $lokasi)
     {
-        $lokasi->delete();
+        $lokasi->update([
+            'aktif' => 'N',
+        ]);
 
         return redirect()
             ->route('admin.lokasi.index')
-            ->with('success', 'Lokasi berhasil dihapus');
+            ->with('success', 'Lokasi berhasil dinonaktifkan');
     }
 }
