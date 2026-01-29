@@ -34,15 +34,20 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($lokasis as $index => $lokasi)
+
+                    @forelse (($lokasis ?? collect()) as $index => $lokasi)
                         <tr>
                             <th>{{ $index + 1 }}</th>
-                            <td>{{ $lokasi->nama_lokasi }}</td>
+                            <td>{{ $lokasi->nama_lokasi ?? '-' }}</td>
                             <td>
-                                <span class="badge badge-success">Aktif</span>
+                                @if(($lokasi->aktif ?? 'N') === 'Y')
+                                    <span class="badge badge-success">Aktif</span>
+                                @else
+                                    <span class="badge badge-ghost">Nonaktif</span>
+                                @endif
                             </td>
                             <td>
-                                <a href="{{ route('admin.lokasi.edit', $lokasi->id) }}"
+                                <a href="{{ route('admin.lokasi.edit', $lokasi->id ?? 0) }}"
                                    class="btn btn-sm btn-primary mr-2">
                                     Edit
                                 </a>
@@ -50,7 +55,7 @@
                                 <button
                                     class="btn btn-sm bg-red-500 text-white"
                                     onclick="openDeleteModal(this)"
-                                    data-id="{{ $lokasi->id }}">
+                                    data-id="{{ $lokasi->id ?? 0 }}">
                                     Hapus
                                 </button>
                             </td>
@@ -62,6 +67,7 @@
                             </td>
                         </tr>
                     @endforelse
+
                 </tbody>
             </table>
         </div>
@@ -77,8 +83,12 @@
             <p>Yakin ingin menonaktifkan lokasi ini?</p>
 
             <div class="modal-action">
-                <button class="btn btn-primary" type="submit">Ya, Nonaktifkan</button>
-                <button type="button" class="btn" onclick="delete_modal.close()">Batal</button>
+                <button class="btn btn-primary" type="submit">
+                    Ya, Nonaktifkan
+                </button>
+                <button type="button" class="btn" onclick="delete_modal.close()">
+                    Batal
+                </button>
             </div>
         </form>
     </dialog>
@@ -86,6 +96,8 @@
     <script>
         function openDeleteModal(button) {
             const id = button.dataset.id
+            if (!id) return
+
             const form = document.querySelector('#delete_modal form')
             form.action = `/admin/lokasi/${id}`
             delete_modal.showModal()
