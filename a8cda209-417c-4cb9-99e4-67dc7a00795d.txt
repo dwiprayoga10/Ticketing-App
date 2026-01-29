@@ -1,90 +1,58 @@
-namespace App\Http\Controllers\Admin;
+<x-layouts.app>
+    <div class="max-w-5xl mx-auto py-8">
 
-use App\Http\Controllers\Controller;
-use App\Models\Lokasi;
-use Illuminate\Http\Request;
+        <div class="flex justify-between mb-4">
+            <h1 class="text-xl font-bold">Data Lokasi</h1>
+            <a href="{{ route('admin.lokasi.create') }}" class="btn btn-primary">
+                + Tambah Lokasi
+            </a>
+        </div>
 
-class LokasiController extends Controller
-{
-    /** 
-     * Tampilkan lokasi aktif 
-     */
-    public function index()
-    {
-        $lokasis = Lokasi::where('aktif', 'Y')
-            ->orderBy('id', 'desc')
-            ->get();
+        @if(session('success'))
+            <div class="alert alert-success mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
 
-        return view('admin.lokasi.index', compact('lokasis'));
-    }
+        <table class="table table-bordered w-full">
+            <thead>
+                <tr>
+                    <th width="5%">No</th>
+                    <th>Nama Lokasi</th>
+                    <th width="20%">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($lokasis as $lokasi)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $lokasi->nama_lokasi }}</td>
+                        <td class="flex gap-2">
+                            <a href="{{ route('admin.lokasi.edit', $lokasi->id) }}"
+                               class="btn btn-warning btn-sm">
+                                Edit
+                            </a>
 
-    /** 
-     * Form tambah lokasi 
-     */
-    public function create()
-    {
-        return view('admin.lokasi.create');
-    }
+                            <form action="{{ route('admin.lokasi.destroy', $lokasi->id) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Yakin ingin menonaktifkan lokasi ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    Hapus
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="3" class="text-center">
+                            Data lokasi kosong
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
 
-    /** 
-     * Simpan lokasi baru 
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nama_lokasi' => 'required|string|max:255',
-        ]);
-
-        Lokasi::create([
-            'nama_lokasi' => $request->nama_lokasi,
-            'aktif' => 'Y',
-        ]);
-
-        return redirect()
-            ->route('admin.lokasi.index')
-            ->with('success', 'Lokasi berhasil ditambahkan');
-    }
-
-    /** 
-     * Form edit lokasi 
-     */
-    public function edit(Lokasi $lokasi)
-    {
-        return view('admin.lokasi.edit', compact('lokasi'));
-    }
-
-    /** 
-     * Update lokasi 
-     */
-    public function update(Request $request, Lokasi $lokasi)
-    {
-        $request->validate([
-            'nama_lokasi' => 'required|string|max:255',
-            'aktif' => 'required|in:Y,N',
-        ]);
-
-        $lokasi->update([
-            'nama_lokasi' => $request->nama_lokasi,
-            'aktif' => $request->aktif,
-        ]);
-
-        return redirect()
-            ->route('admin.lokasi.index')
-            ->with('success', 'Lokasi berhasil diperbarui');
-    }
-
-    /** 
-     * "Hapus" lokasi (SOFT DELETE MANUAL)
-     * aktif Y → N
-     */
-    public function destroy(Lokasi $lokasi)
-    {
-        $lokasi->update([
-            'aktif' => 'N',
-        ]);
-
-        return redirect()
-            ->route('admin.lokasi.index')
-            ->with('success', 'Lokasi berhasil dinonaktifkan');
-    }
-}
+    </div>
+</x-layouts.app>
