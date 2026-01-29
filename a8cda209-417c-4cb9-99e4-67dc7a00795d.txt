@@ -1,107 +1,61 @@
-<x-layouts.admin title="Manajemen Lokasi">
+<x-layouts.admin title="Edit Lokasi">
 
-    {{-- Toast Success --}}
-    @if (session('success'))
-        <div class="toast toast-bottom toast-center">
-            <div class="alert alert-success">
-                <span>{{ session('success') }}</span>
-            </div>
-        </div>
+    <div class="container mx-auto p-10 max-w-xl">
+        <h1 class="text-3xl font-semibold mb-6">Edit Lokasi</h1>
 
-        <script>
-            setTimeout(() => {
-                document.querySelector('.toast')?.remove()
-            }, 3000)
-        </script>
-    @endif
-
-    <div class="container mx-auto p-10">
-        <div class="flex items-center mb-4">
-            <h1 class="text-3xl font-semibold">Manajemen Lokasi</h1>
-            <a href="{{ route('admin.lokasi.create') }}" class="btn btn-primary ml-auto">
-                Tambah Lokasi
-            </a>
-        </div>
-
-        <div class="overflow-x-auto rounded-box bg-white p-5 shadow-xs">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Lokasi</th>
-                        <th>Status</th>
-                        <th width="20%">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    @forelse (($lokasis ?? collect()) as $index => $lokasi)
-                        <tr>
-                            <th>{{ $index + 1 }}</th>
-                            <td>{{ $lokasi->nama_lokasi ?? '-' }}</td>
-                            <td>
-                                @if(($lokasi->aktif ?? 'N') === 'Y')
-                                    <span class="badge badge-success">Aktif</span>
-                                @else
-                                    <span class="badge badge-ghost">Nonaktif</span>
-                                @endif
-                            </td>
-                            <td>
-                                <a href="{{ route('admin.lokasi.edit', $lokasi->id ?? 0) }}"
-                                   class="btn btn-sm btn-primary mr-2">
-                                    Edit
-                                </a>
-
-                                <button
-                                    class="btn btn-sm bg-red-500 text-white"
-                                    onclick="openDeleteModal(this)"
-                                    data-id="{{ $lokasi->id ?? 0 }}">
-                                    Hapus
-                                </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="text-center">
-                                Tidak ada data lokasi.
-                            </td>
-                        </tr>
-                    @endforelse
-
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    {{-- Modal Hapus --}}
-    <dialog id="delete_modal" class="modal">
-        <form method="POST" class="modal-box">
+        <form
+            action="{{ route('admin.lokasi.update', $lokasi->id ?? 0) }}"
+            method="POST"
+            class="bg-white p-6 rounded-box shadow-xs"
+        >
             @csrf
-            @method('DELETE')
+            @method('PUT')
 
-            <h3 class="text-lg font-bold mb-4">Nonaktifkan Lokasi</h3>
-            <p>Yakin ingin menonaktifkan lokasi ini?</p>
+            {{-- Nama Lokasi --}}
+            <div class="mb-4">
+                <label class="label">
+                    <span class="label-text">Nama Lokasi</span>
+                </label>
+                <input
+                    type="text"
+                    name="nama_lokasi"
+                    class="input input-bordered w-full"
+                    value="{{ old('nama_lokasi', $lokasi->nama_lokasi ?? '') }}"
+                    required
+                >
+                @error('nama_lokasi')
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
 
-            <div class="modal-action">
-                <button class="btn btn-primary" type="submit">
-                    Ya, Nonaktifkan
-                </button>
-                <button type="button" class="btn" onclick="delete_modal.close()">
-                    Batal
+            {{-- Status --}}
+            <div class="mb-6">
+                <label class="label">
+                    <span class="label-text">Status</span>
+                </label>
+                <select name="aktif" class="select select-bordered w-full">
+                    <option value="Y"
+                        {{ old('aktif', $lokasi->aktif ?? 'Y') === 'Y' ? 'selected' : '' }}>
+                        Aktif
+                    </option>
+                    <option value="N"
+                        {{ old('aktif', $lokasi->aktif ?? 'Y') === 'N' ? 'selected' : '' }}>
+                        Nonaktif
+                    </option>
+                </select>
+            </div>
+
+            {{-- Action --}}
+            <div class="flex justify-end gap-2">
+                <a href="{{ route('admin.lokasi.index') }}" class="btn">
+                    Kembali
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    Update
                 </button>
             </div>
+
         </form>
-    </dialog>
-
-    <script>
-        function openDeleteModal(button) {
-            const id = button.dataset.id
-            if (!id) return
-
-            const form = document.querySelector('#delete_modal form')
-            form.action = `/admin/lokasi/${id}`
-            delete_modal.showModal()
-        }
-    </script>
+    </div>
 
 </x-layouts.admin>
