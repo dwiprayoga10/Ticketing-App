@@ -1,147 +1,243 @@
-<x-layouts.admin title="Edit Event">
 
-    {{-- Error Validation --}}
-    @if ($errors->any())
-        <div class="toast toast-bottom toast-center">
-            <div class="alert alert-error">
-                <ul class="list-disc ml-4">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
+INI MIGRASI LOKASI
+<?php
 
-        <script>
-            setTimeout(() => {
-                document.querySelector('.toast')?.remove()
-            }, 4000)
-        </script>
-    @endif
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-    <div class="container mx-auto p-10 max-w-3xl">
-        <h1 class="text-3xl font-semibold mb-6">Edit Event</h1>
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('lokasis', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama_lokasi');
+            $table->string('aktif',1)->default('Y');
+            $table->timestamps();
+        });
+    }
 
-        <form
-            action="{{ route('admin.events.update', $event->id) }}"
-            method="POST"
-            enctype="multipart/form-data"
-            class="bg-white p-6 rounded-box shadow-xs"
-        >
-            @csrf
-            @method('PUT')
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('lokasis');
+    }
+};
 
-            {{-- Judul --}}
-            <div class="mb-4">
-                <label class="label">
-                    <span class="label-text">Judul Event</span>
-                </label>
-                <input
-                    type="text"
-                    name="judul"
-                    class="input input-bordered w-full"
-                    value="{{ old('judul', $event->judul) }}"
-                    required
-                >
-            </div>
 
-            {{-- Deskripsi --}}
-            <div class="mb-4">
-                <label class="label">
-                    <span class="label-text">Deskripsi</span>
-                </label>
-                <textarea
-                    name="deskripsi"
-                    class="textarea textarea-bordered w-full"
-                    rows="4"
-                    required
-                >{{ old('deskripsi', $event->deskripsi) }}</textarea>
-            </div>
+SEEDER
+<?php
 
-            {{-- Kategori --}}
-            <div class="mb-4">
-                <label class="label">
-                    <span class="label-text">Kategori</span>
-                </label>
-                <select name="kategori_id" class="select select-bordered w-full" required>
-                    <option value="">-- Pilih Kategori --</option>
-                    @foreach (($categories ?? []) as $kategori)
-                        <option value="{{ $kategori->id }}"
-                            {{ old('kategori_id', $event->kategori_id) == $kategori->id ? 'selected' : '' }}>
-                            {{ $kategori->nama }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+namespace Database\Seeders;
 
-            {{-- Lokasi --}}
-            <div class="mb-4">
-                <label class="label">
-                    <span class="label-text">Lokasi</span>
-                </label>
-                <select name="lokasi_id" class="select select-bordered w-full" required>
-                    <option value="">-- Pilih Lokasi --</option>
-                    @foreach (($lokasis ?? []) as $lokasi)
-                        <option value="{{ $lokasi->id }}"
-                            {{ old('lokasi_id', $event->lokasi_id) == $lokasi->id ? 'selected' : '' }}>
-                            {{ $lokasi->nama_lokasi }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Seeder;
 
-            {{-- Tanggal & Waktu --}}
-            <div class="mb-4">
-                <label class="label">
-                    <span class="label-text">Tanggal & Waktu</span>
-                </label>
-                <input
-                    type="datetime-local"
-                    name="tanggal_waktu"
-                    class="input input-bordered w-full"
-                    value="{{ old('tanggal_waktu', \Carbon\Carbon::parse($event->tanggal_waktu)->format('Y-m-d\TH:i')) }}"
-                    required
-                >
-            </div>
+use function Symfony\Component\Clock\now;
 
-            {{-- Gambar Lama --}}
-            @if ($event->gambar)
-                <div class="mb-4">
-                    <label class="label">
-                        <span class="label-text">Gambar Saat Ini</span>
-                    </label>
-                    <img
-                        src="{{ asset('images/events/' . $event->gambar) }}"
-                        alt="Gambar Event"
-                        class="w-48 rounded-lg shadow"
-                    >
-                </div>
-            @endif
+class LokasiSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        DB::table('lokasis')->insert(
+            [
+                [
+                    'nama_lokasi' => 'Stadion Utama',
+                    'aktif' =>  'Y',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+    
+                ],
+                [
+                    'nama_lokasi' => 'Galeri Seni Kota',
+                    'aktif' =>  'Y',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+    
+                ],
+                [
+                    'nama_lokasi' => 'Taman Kota',
+                    'aktif' =>  'Y',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+    
+                ],
+     
 
-            {{-- Ganti Gambar --}}
-            <div class="mb-6">
-                <label class="label">
-                    <span class="label-text">Ganti Gambar (Opsional)</span>
-                </label>
-                <input
-                    type="file"
-                    name="gambar"
-                    class="file-input file-input-bordered w-full"
-                    accept="image/*"
-                >
-            </div>
+            ]);
 
-            {{-- Action --}}
-            <div class="flex justify-end gap-2">
-                <a href="{{ route('admin.events.index') }}" class="btn">
-                    Kembali
-                </a>
-                <button type="submit" class="btn btn-primary">
-                    Update Event
-                </button>
-            </div>
+            
+        }
+}
 
-        </form>
-    </div>
 
-</x-layouts.admin>
+MODEL LOKASI
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Lokasi extends Model
+{
+    use HasFactory;
+    
+    protected $fillable = [
+        'nama_lokasi',
+        'aktif',
+    ];
+
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
+}
+
+
+MODEL EVENT
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Event extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'judul',
+        'deskripsi',
+        'tanggal_waktu',
+        'lokasi',
+        'kategori_id',
+        'gambar',
+    ];
+
+    protected $casts = [
+        'tanggal_waktu' => 'datetime',
+    ];
+
+    public function tikets()
+    {
+        return $this->hasMany(Tiket::class);
+    }
+
+    public function kategori()
+    {
+        return $this->belongsTo(Kategori::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    public function Lokasi()
+    {
+        return $this->belongsTo(Lokasi::class);
+    }
+}
+
+CONTROLLER LOKASI
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Lokasi;
+use Illuminate\Http\Request;
+
+class LokasiController extends Controller
+{
+    /** 
+     * Tampilkan daftar lokasi 
+     */
+    public function index()
+    {
+        $lokasis = Lokasi::orderBy('id', 'desc')->get();
+        return view('admin.lokasi.index', compact('lokasis'));
+    }
+
+    /** 
+     * Form tambah lokasi 
+     */
+    public function create()
+    {
+        return view('admin.lokasi.create');
+    }
+
+    /** 
+     * Simpan data lokasi 
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nama_lokasi' => 'required|string|max:255',
+        ]);
+
+        Lokasi::create([
+            'nama_lokasi' => $request->nama_lokasi,
+            'aktif' => $request->aktif ?? 'Y',
+        ]);
+
+        return redirect()
+            ->route('admin.lokasi.index')
+            ->with('success', 'Lokasi berhasil ditambahkan');
+    }
+
+    /** 
+     * Form edit lokasi 
+     */
+    public function edit(Lokasi $lokasi)
+    {
+        return view('admin.lokasi.edit', compact('lokasi'));
+    }
+
+    /** 
+     * Update data lokasi 
+     */
+    public function update(Request $request, Lokasi $lokasi)
+    {
+        $request->validate([
+            'nama_lokasi' => 'required|string|max:255',
+            'aktif' => 'required|in:Y,N',
+        ]);
+
+        $lokasi->update([
+            'nama_lokasi' => $request->nama_lokasi,
+            'aktif' => $request->aktif,
+        ]);
+
+        return redirect()
+            ->route('admin.lokasi.index')
+            ->with('success', 'Lokasi berhasil diupdate');
+    }
+
+    /** 
+     * Hapus lokasi 
+     */
+    public function destroy(Lokasi $lokasi)
+    {
+        $lokasi->delete();
+
+        return redirect()
+            ->route('admin.lokasi.index')
+            ->with('success', 'Lokasi berhasil dihapus');
+    }
+}
+
+SAYA KIRIM INI DULU AKAN SAYA ALNJUT BAGIAN KODE EVENT KAMU DIAM DULU SEBELU PERINTAH SAYA BERI
+
